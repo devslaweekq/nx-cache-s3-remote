@@ -1,14 +1,26 @@
 <p align="center">
-  <img src="assets/banner.png" alt="nx-cache-s3-remote" width="100%"/>
+  <img src="https://raw.githubusercontent.com/devslaweekq/nx-cache-s3-remote/main/assets/banner.png" alt="nx-cache-s3-remote" width="100%"/>
 </p>
 
-A self-hosted [Nx remote cache](https://nx.dev/docs/guides/tasks--caching/self-hosted-caching) server backed by S3-compatible storage (built for Cloud Object Storage).
+[![CI](https://github.com/devslaweekq/nx-cache-s3-remote/actions/workflows/ci.yml/badge.svg)](https://github.com/devslaweekq/nx-cache-s3-remote/actions/workflows/ci.yml)
+[![Docker Publish](https://github.com/devslaweekq/nx-cache-s3-remote/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/devslaweekq/nx-cache-s3-remote/actions/workflows/docker-publish.yml)
 
-Nx's own S3 cache plugins (`@nx/s3-cache` and friends) were deprecated due to [CVE-2025-36852 (CREEP)](https://nx.dev/docs/reference/deprecated/self-hosted-cache-packages) and no longer support current Nx versions. This service implements Nx's self-hosted remote cache HTTP API directly, with one deliberate hardening the deprecated plugins lacked: **an upload for a hash that already exists is rejected with `409`** — cached artifacts are immutable once written, closing the cache-poisoning vector CREEP exploited.
+A self-hosted [Nx remote cache](https://nx.dev/docs/guides/tasks--caching/self-hosted-caching) server backed by S3-compatible storage — small, fast, and self-hosted, without the security issue that sank Nx's official plugins.
+
+Nx's own `@nx/s3-cache` and friends were deprecated due to [CVE-2025-36852 (CREEP)](https://nx.dev/docs/reference/deprecated/self-hosted-cache-packages) and no longer support current Nx versions. This service implements Nx's self-hosted remote cache HTTP API directly, deliberately closing the gap that got the official plugins pulled.
 
 **Docker image:** [`slaweekq/nx-cache-s3:latest`](https://hub.docker.com/r/slaweekq/nx-cache-s3) —
 every build also pushes a `:<version>` tag matching `package.json` (e.g. `:1.2.2`), if you'd
 rather pin to a specific release than track `latest`.
+
+## Features
+
+- 🔒 **Immutable cache** — an upload for a hash that already exists is rejected with `409`, never silently overwritten. Closes the cache-poisoning vector [CVE-2025-36852 (CREEP)](https://nx.dev/docs/reference/deprecated/self-hosted-cache-packages) exploited in the official plugins.
+- ⚡ **Zero extra config on the client** — no `nx.json` changes, no npm packages to install. Two environment variables and you're done; this is core Nx behavior since 20.8.
+- 📦 **S3-compatible, any provider** — built for Yandex Cloud Object Storage, works with any S3-compatible endpoint (path-style or virtual-hosted).
+- 🪶 **Thin image, native TypeScript** — runs directly on Node 24's built-in TS execution, no `ts-node`, no `tsx`, no bundler.
+- 🧪 **Tested** — `node:test` suite covering auth, hash validation, and the write → conflict flow, gated in CI on every push/PR.
+- 🛡️ **Not a happy-path demo** — graceful `SIGTERM` shutdown, a configurable upload size cap (`413` past the limit), and constant-time bearer token comparison.
 
 ---
 
@@ -164,7 +176,7 @@ docker run -d --restart unless-stopped --name nx-cache-s3 \
 | Variable                       | Required | Description                                                               |
 | ------------------------------ | -------- | ------------------------------------------------------------------------- |
 | `PORT`                         | No       | Listen port (default `55100`)                                             |
-| `CACHE_ACCESS_TOKEN`           | Yes      | Bearer token clients must present(openssl rand -hex 32)                   |
+| `CACHE_ACCESS_TOKEN`           | Yes      | Bearer token clients must present (generate with `openssl rand -hex 32`)  |
 | `NXCACHE_S3_ACCESS_KEY_ID`     | Yes      | S3 access key                                                             |
 | `NXCACHE_S3_SECRET_ACCESS_KEY` | Yes      | S3 secret key                                                             |
 | `NXCACHE_S3_BUCKET`            | Yes      | Bucket name (must already exist)                                          |
@@ -191,6 +203,7 @@ npm run push      # build and push to Docker Hub
 See [`scripts/docker/build.sh`](scripts/docker/build.sh) and [`scripts/docker/push.sh`](scripts/docker/push.sh).
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs typecheck + tests on every push/PR;
 [`.github/workflows/docker-publish.yml`](.github/workflows/docker-publish.yml) auto-builds and
-pushes the image on changes to `Dockerfile`/`package.json`/`src/**` on `main`/`master`.
+pushes the image (and syncs this README to the Docker Hub overview) on changes to
+`Dockerfile`/`package.json`/`src/**`/`README.md` on `main`/`master`.
 
 </details>

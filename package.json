@@ -1,6 +1,6 @@
 {
   "name": "nx-cache-s3-remote",
-  "version": "1.2.3",
+  "version": "1.3.0",
   "private": true,
   "description": "Self-hosted Nx remote cache server backed by S3-compatible storage",
   "license": "MIT",
