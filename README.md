@@ -1,5 +1,3 @@
-# nx-cache-s3-remote
-
 <p align="center">
   <img src="assets/banner.png" alt="nx-cache-s3-remote" width="100%"/>
 </p>
