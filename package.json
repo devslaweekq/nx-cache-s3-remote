@@ -1,0 +1,26 @@
+{
+  "name": "nx-cache-s3-remote",
+  "version": "1.4.0",
+  "private": true,
+  "description": "Self-hosted Nx remote cache server backed by S3-compatible storage",
+  "license": "MIT",
+  "author": "devslaweekq",
+  "type": "commonjs",
+  "scripts": {
+    "build": "bash scripts/docker/build.sh",
+    "bump": "bash scripts/utils/bump-version.sh",
+    "dev": "node --watch --env-file=.env src/server.js",
+    "format": "prettier -w .",
+    "push": "bash scripts/docker/push.sh",
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1087.0",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.5",
+    "prettier-plugin-packagejson": "^3.0.2",
+    "prettier-plugin-sort-json": "^4.2.0"
+  }
+}

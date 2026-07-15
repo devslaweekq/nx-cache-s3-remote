@@ -1,0 +1,9 @@
+# Secrets and runtime state — do not commit
+.env
+certs/*.crt
+certs/*.key
+
+.DS_Store
+.omc
+node_modules/
+package-lock.json

@@ -1,0 +1,17 @@
+# Secrets and runtime state — do not commit
+.env
+
+# Editor junk
+*.swp
+*.swo
+*~
+.DS_Store
+
+.claude/worktrees
+**/.fuse_*
+*.lnk
+
+.omc
+
+dist
+build
