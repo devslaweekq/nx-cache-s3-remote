@@ -2,7 +2,15 @@ name: CI
 
 on:
   push:
-    branches-ignore: [main, master]
+    branches: [main, master]
+    paths:
+      - Dockerfile
+      - package.json
+      - package-lock.json
+      - tsconfig.json
+      - ecosystem.config.cjs
+      - src/**
+      - README.md
   pull_request:
 
 jobs:
