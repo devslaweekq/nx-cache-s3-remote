@@ -2,8 +2,8 @@ name: Docker Publish
 
 # Required repo secrets:
 #   DOCKER_USERNAME — Docker Hub login (e.g. slaweekq)
-#   DOCKER_PASSWORD — Docker Hub access token with Read & Write scope (not account
-#                     password
+#   DOCKER_PASSWORD — Docker Hub Personal Access Token with "Read, Write, Delete" scope
+#                     (not account password)
 #
 # Registry cache: slaweekq/nx-cache-s3:buildcache
 
