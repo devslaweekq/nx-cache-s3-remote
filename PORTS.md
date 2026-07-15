@@ -1,11 +1,11 @@
 # Ports
 
-| Service     | Port                  | URL                   | Health check  |
-| ----------- | --------------------- | --------------------- | ------------- |
-| nx-cache-s3 | `PORT` (default 3000) | http://localhost:3000 | `GET /health` |
+| Service     | Port                     | URL                    | Health check  |
+| ----------- | ------------------------ | ---------------------- | ------------- |
+| nx-cache-s3 | `PORT` (default `55100`) | http://localhost:55100 | `GET /health` |
 
 `docker-compose.yml` publishes the container's `PORT` to the same port on the
-host (`${PORT:-3000}:${PORT:-3000}`) — set `PORT` in `.env` to change it.
+host (`${PORT:-55100}:${PORT:-55100}`) — set `PORT` in `.env` to change it.
 
 ## Endpoints
 

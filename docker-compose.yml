@@ -4,6 +4,6 @@ services:
     image: slaweekq/nx-cache-s3:latest
     restart: unless-stopped
     ports:
-      - '${PORT:-3000}:${PORT:-3000}'
+      - '${PORT:-55100}:${PORT:-55100}'
     env_file:
       - .env

@@ -1,6 +1,6 @@
 {
   "name": "nx-cache-s3-remote",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "private": true,
   "description": "Self-hosted Nx remote cache server backed by S3-compatible storage",
   "license": "MIT",
@@ -9,11 +9,12 @@
   "scripts": {
     "build": "bash scripts/docker/build.sh",
     "bump": "bash scripts/utils/bump-version.sh",
-    "compile": "tsc -p tsconfig.json",
+    "compile": "tsc -p tsconfig.build.json",
     "dev": "nodemon --exec \"node --env-file=.env\" src/server.ts",
     "format": "prettier -w .",
     "push": "bash scripts/docker/push.sh",
     "start": "pm2-runtime start ecosystem.config.cjs",
+    "test": "node --test src/**/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -29,5 +30,8 @@
     "prettier-plugin-packagejson": "^3.0.2",
     "prettier-plugin-sort-json": "^4.2.0",
     "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }
