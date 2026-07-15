@@ -24,12 +24,13 @@ elif [ -z "${DOCKER_USERNAME:-}" ]; then
   fi
 fi
 
-IMAGE="$DOCKER_USERNAME/nx-cache-s3:latest"
-CACHE="$DOCKER_USERNAME/nx-cache-s3:buildcache"
+REPO_IMAGE="$DOCKER_USERNAME/nx-cache-s3"
+VERSION="$(node -p "require('./package.json').version")"
+CACHE="$REPO_IMAGE:buildcache"
 
 if [ "$CI" != "true" ]; then
-  echo "==> Remove old local image: $IMAGE"
-  docker rmi -f "$IMAGE" 2>/dev/null || true
+  echo "==> Remove old local images: $REPO_IMAGE:latest, $REPO_IMAGE:$VERSION"
+  docker rmi -f "$REPO_IMAGE:latest" "$REPO_IMAGE:$VERSION" 2>/dev/null || true
 fi
 
 docker buildx build \
@@ -38,7 +39,7 @@ docker buildx build \
   --build-arg HTTPS_PROXY= --build-arg https_proxy= \
   --cache-from type=registry,ref="$CACHE" \
   --cache-to   type=registry,ref="$CACHE",mode=max \
-  -t "$IMAGE" --load \
+  -t "$REPO_IMAGE:latest" -t "$REPO_IMAGE:$VERSION" --load \
   .
 
-echo "OK: $IMAGE  (cache → $CACHE)"
+echo "OK: $REPO_IMAGE:latest, $REPO_IMAGE:$VERSION  (cache → $CACHE)"

@@ -30,14 +30,16 @@ else
   fi
 fi
 
-IMAGE="$DOCKER_USERNAME/nx-cache-s3:latest"
+REPO_IMAGE="$DOCKER_USERNAME/nx-cache-s3"
+VERSION="$(node -p "require('./package.json').version")"
 
 [ "$CI" != "true" ] && DOCKER_USERNAME="$DOCKER_USERNAME" bash "$REPO/scripts/docker/build.sh"
 
-echo "==> Push: $IMAGE"
-docker push "$IMAGE"
-[ "$CI" != "true" ] && docker pull "$IMAGE"
+echo "==> Push: $REPO_IMAGE:latest, $REPO_IMAGE:$VERSION"
+docker push "$REPO_IMAGE:latest"
+docker push "$REPO_IMAGE:$VERSION"
+[ "$CI" != "true" ] && docker pull "$REPO_IMAGE:latest"
 
-echo "  Registry: $IMAGE"
+echo "  Registry: $REPO_IMAGE:latest, $REPO_IMAGE:$VERSION"
 echo
 echo "Done."

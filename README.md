@@ -6,7 +6,9 @@ A self-hosted [Nx remote cache](https://nx.dev/docs/guides/tasks--caching/self-h
 
 Nx's own S3 cache plugins (`@nx/s3-cache` and friends) were deprecated due to [CVE-2025-36852 (CREEP)](https://nx.dev/docs/reference/deprecated/self-hosted-cache-packages) and no longer support current Nx versions. This service implements Nx's self-hosted remote cache HTTP API directly, with one deliberate hardening the deprecated plugins lacked: **an upload for a hash that already exists is rejected with `409`** — cached artifacts are immutable once written, closing the cache-poisoning vector CREEP exploited.
 
-**Docker image:** [`slaweekq/nx-cache-s3:latest`](https://hub.docker.com/r/slaweekq/nx-cache-s3)
+**Docker image:** [`slaweekq/nx-cache-s3:latest`](https://hub.docker.com/r/slaweekq/nx-cache-s3) —
+every build also pushes a `:<version>` tag matching `package.json` (e.g. `:1.2.2`), if you'd
+rather pin to a specific release than track `latest`.
 
 ---
 
