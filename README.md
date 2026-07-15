@@ -1,5 +1,9 @@
 # nx-cache-s3-remote
 
+<p align="center">
+  <img src="assets/banner.png" alt="nx-cache-s3-remote" width="100%"/>
+</p>
+
 A self-hosted [Nx remote cache](https://nx.dev/docs/guides/tasks--caching/self-hosted-caching) server backed by S3-compatible storage (built for Cloud Object Storage).
 
 Nx's own S3 cache plugins (`@nx/s3-cache` and friends) were deprecated due to [CVE-2025-36852 (CREEP)](https://nx.dev/docs/reference/deprecated/self-hosted-cache-packages) and no longer support current Nx versions. This service implements Nx's self-hosted remote cache HTTP API directly, with one deliberate hardening the deprecated plugins lacked: **an upload for a hash that already exists is rejected with `409`** — cached artifacts are immutable once written, closing the cache-poisoning vector CREEP exploited.
