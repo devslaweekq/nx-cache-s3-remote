@@ -2,13 +2,10 @@
 .github
 .omc
 .vscode
-certs
-features
+dist
 node_modules
 scripts/*.sh
-!scripts/menu.sh
-!scripts/update-certs.sh
-!scripts/ensure-claude-cli.sh
+changelogs
 
 .cursorignore
 .editorconfig
@@ -16,12 +13,8 @@ scripts/*.sh
 .prettierignore
 .prettierrc
 CODEOWNERS
-docker-compose.dev.yml
 docker-compose.yml
-INSTALL.md
-package-lock.json
-package.json
-README.md
+*.md
 
 .claude/
 .claude.json

@@ -1,0 +1,9 @@
+# Installed layout — image from Docker Hub, no local build.
+services:
+  nx-cache-s3:
+    image: slaweekq/nx-cache-s3:latest
+    restart: unless-stopped
+    ports:
+      - '${PORT:-3000}:${PORT:-3000}'
+    env_file:
+      - .env
