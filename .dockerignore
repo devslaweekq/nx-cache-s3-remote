@@ -1,22 +1,11 @@
-# exclude from build context (secrets and host state)
-.github
-.omc
-.vscode
-dist
-node_modules
-scripts/*.sh
-changelogs
+# Ignore everything by default — only allow what the Docker build actually
+# needs (see Dockerfile's COPY lines). Simpler than maintaining a deny-list.
+*
 
-.cursorignore
-.editorconfig
-.gitignore
-.prettierignore
-.prettierrc
-CODEOWNERS
-docker-compose.yml
-*.md
-
-.claude/
-.claude.json
-.env
-.env.example
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig.build.json
+!ecosystem.config.cjs
+!src/
+!src/**
