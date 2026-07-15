@@ -104,6 +104,57 @@ Job-level `env:` is enough — no need to repeat it on every step.
 
 ---
 
+## Run without cloning
+
+No repo needed — pull and run the image directly.
+
+### Quick start (one command)
+
+```bash
+docker run -d --restart unless-stopped --name nx-cache-s3 -p 55100:55100 \
+  -e CACHE_ACCESS_TOKEN=<generate a random secret # openssl rand -hex 32> \
+  -e NXCACHE_S3_ACCESS_KEY_ID=<your-key> \
+  -e NXCACHE_S3_SECRET_ACCESS_KEY=<your-secret> \
+  -e NXCACHE_S3_BUCKET=<your-bucket> \
+  -e NXCACHE_S3_REGION=<your-region> \
+  -e NXCACHE_S3_ENDPOINT=https://storage.yandexcloud.net \
+  -e NXCACHE_S3_FORCE_PATH_STYLE=true \
+  slaweekq/nx-cache-s3:latest
+```
+
+Pulls `slaweekq/nx-cache-s3:latest` automatically on first run and starts listening on
+`55100`. See [Configuration reference](#configuration-reference) below for what each
+variable does.
+
+### With an env file instead
+
+If you'd rather keep secrets in a file than inline on the command line:
+
+```bash
+mkdir -p ~/nx-cache-s3
+chmod 700 ~/nx-cache-s3
+
+cat > ~/nx-cache-s3/.env <<'EOF'
+PORT=55100
+CACHE_ACCESS_TOKEN=<generate a random secret # openssl rand -hex 32>
+
+NXCACHE_S3_ACCESS_KEY_ID=
+NXCACHE_S3_SECRET_ACCESS_KEY=
+NXCACHE_S3_BUCKET=
+NXCACHE_S3_REGION=
+NXCACHE_S3_ENDPOINT=
+NXCACHE_S3_FORCE_PATH_STYLE=true
+EOF
+chmod 600 ~/nx-cache-s3/.env
+
+docker run -d --restart unless-stopped --name nx-cache-s3 \
+  --env-file ~/nx-cache-s3/.env \
+  -p 55100:55100 \
+  slaweekq/nx-cache-s3:latest
+```
+
+---
+
 ## Configuration reference
 
 | Variable                       | Required | Description                                                               |
