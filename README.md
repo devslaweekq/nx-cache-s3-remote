@@ -189,6 +189,14 @@ See [`.env.example`](.env.example) for the full template.
 
 ---
 
+## Contributing
+
+Feel free to [open an issue](https://github.com/devslaweekq/nx-cache-s3-remote/issues/new) or a
+[pull request](https://github.com/devslaweekq/nx-cache-s3-remote/pulls), following the
+[Contributing Guidelines](CONTRIBUTING.md).
+
+---
+
 <details>
 <summary>For maintainers</summary>
 
