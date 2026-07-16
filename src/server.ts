@@ -1,4 +1,7 @@
 import { createApp } from './app.ts';
+import { validateEnv } from './env.ts';
+
+validateEnv();
 
 const PORT = process.env.PORT || 55100;
 

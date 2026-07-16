@@ -12,6 +12,7 @@ host (`${PORT:-55100}:${PORT:-55100}`) — set `PORT` in `.env` to change it.
 | Method | Path              | Purpose                                                     |
 | ------ | ----------------- | ----------------------------------------------------------- |
 | GET    | `/health`         | Liveness check (used by Docker healthcheck)                 |
+| GET    | `/health/ready`   | Readiness check — `503` if the S3 bucket isn't reachable    |
 | GET    | `/v1/cache/:hash` | Download a cached task artifact                             |
 | PUT    | `/v1/cache/:hash` | Upload a task artifact (rejects existing hashes with `409`) |
 

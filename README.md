@@ -19,8 +19,8 @@ rather pin to a specific release than track `latest`.
 - ⚡ **Zero extra config on the client** — no `nx.json` changes, no npm packages to install. Two environment variables and you're done; this is core Nx behavior since 20.8.
 - 📦 **S3-compatible, any provider** — built for Yandex Cloud Object Storage, works with any S3-compatible endpoint (path-style or virtual-hosted).
 - 🪶 **Thin image, native TypeScript** — runs directly on Node 24's built-in TS execution, no `ts-node`, no `tsx`, no bundler.
-- 🧪 **Tested** — `node:test` suite covering auth, hash validation, and the write → conflict flow, gated in CI on every push/PR.
-- 🛡️ **Not a happy-path demo** — graceful `SIGTERM` shutdown, a configurable upload size cap (`413` past the limit), and constant-time bearer token comparison.
+- 🧪 **Tested** — `node:test` suite covering auth, hash validation, and the write → conflict flow, gated in CI on every push/PR, alongside `npm audit` and Dependabot for the dependencies themselves.
+- 🛡️ **Not a happy-path demo** — fails fast on missing/invalid config instead of misbehaving at request time, graceful `SIGTERM` shutdown, a configurable upload size cap (`413` past the limit), constant-time bearer token comparison, and a separate `/health/ready` check so an S3 outage doesn't take down liveness.
 
 ---
 
@@ -201,7 +201,9 @@ npm run push      # build and push to Docker Hub
 ```
 
 See [`scripts/docker/build.sh`](scripts/docker/build.sh) and [`scripts/docker/push.sh`](scripts/docker/push.sh).
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs typecheck + tests on every push/PR;
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs typecheck + tests + `npm audit` on
+every push/PR; [`.github/dependabot.yml`](.github/dependabot.yml) keeps npm, GitHub Actions,
+and the Docker base image up to date weekly.
 [`.github/workflows/docker-publish.yml`](.github/workflows/docker-publish.yml) auto-builds and
 pushes the image (and syncs this README to the Docker Hub overview) on changes to
 `Dockerfile`/`package.json`/`src/**`/`README.md` on `main`/`master`.

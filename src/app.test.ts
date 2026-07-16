@@ -13,6 +13,7 @@ function fakeStore(overrides: Partial<CacheStore> = {}): CacheStore {
       throw Object.assign(new Error('not found'), { $metadata: { httpStatusCode: 404 } });
     },
     putObjectStream: async () => {},
+    checkBucketAccess: async () => true,
     ...overrides,
   };
 }
@@ -34,6 +35,22 @@ test('GET /health returns 200 text/plain, no auth required', async () => {
     assert.equal(res.status, 200);
     assert.match(res.headers.get('content-type') ?? '', /text\/plain/);
     assert.equal(await res.text(), 'OK');
+  });
+});
+
+test('GET /health/ready returns 200 when the bucket is reachable', async () => {
+  await withServer(fakeStore(), async base => {
+    const res = await fetch(`${base}/health/ready`);
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get('content-type') ?? '', /text\/plain/);
+  });
+});
+
+test('GET /health/ready returns 503 when the bucket is unreachable', async () => {
+  const store = fakeStore({ checkBucketAccess: async () => false });
+  await withServer(store, async base => {
+    const res = await fetch(`${base}/health/ready`);
+    assert.equal(res.status, 503);
   });
 });
 

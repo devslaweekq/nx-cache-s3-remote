@@ -1,4 +1,4 @@
-import { S3Client, HeadObjectCommand, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, HeadObjectCommand, GetObjectCommand, PutObjectCommand, HeadBucketCommand } from '@aws-sdk/client-s3';
 import type { Readable } from 'stream';
 
 const client = new S3Client({
@@ -12,6 +12,15 @@ const client = new S3Client({
 });
 
 const BUCKET = process.env.NXCACHE_S3_BUCKET!;
+
+export async function checkBucketAccess(): Promise<boolean> {
+  try {
+    await client.send(new HeadBucketCommand({ Bucket: BUCKET }));
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export async function headObject(hash: string): Promise<boolean> {
   try {

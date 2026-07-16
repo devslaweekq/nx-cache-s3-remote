@@ -1,14 +1,15 @@
 import express, { type Express } from 'express';
-import { getObjectStream, headObject, putObjectStream } from './s3.ts';
+import { checkBucketAccess, getObjectStream, headObject, putObjectStream } from './s3.ts';
 import { requireBearerToken } from './auth.ts';
 
 export interface CacheStore {
   headObject: typeof headObject;
   getObjectStream: typeof getObjectStream;
   putObjectStream: typeof putObjectStream;
+  checkBucketAccess: typeof checkBucketAccess;
 }
 
-const defaultStore: CacheStore = { headObject, getObjectStream, putObjectStream };
+const defaultStore: CacheStore = { headObject, getObjectStream, putObjectStream, checkBucketAccess };
 
 const HASH_PATTERN = /^[a-zA-Z0-9_-]{1,128}$/;
 
@@ -31,6 +32,16 @@ export function createApp(store: CacheStore = defaultStore): Express {
   });
 
   app.get('/health', (req, res) => text(res, 200, 'OK'));
+
+  // Separate from /health (liveness) so a transient S3 outage doesn't get the
+  // container killed by a liveness probe — wire this into a readiness probe instead.
+  app.get('/health/ready', async (req, res) => {
+    const bucketReachable = await store.checkBucketAccess();
+    if (!bucketReachable) {
+      return text(res, 503, 'S3 bucket unreachable');
+    }
+    text(res, 200, 'OK');
+  });
 
   app.use('/v1/cache/:hash', requireBearerToken);
 
@@ -84,6 +95,16 @@ export function createApp(store: CacheStore = defaultStore): Express {
       console.error(`PUT /v1/cache/${hash} failed:`, err);
       text(res, 500, 'Internal error');
     }
+  });
+
+  // Safety net for anything a route handler didn't catch itself (e.g. a
+  // rejected promise Express 5 forwards here automatically).
+  app.use((err: unknown, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (res.headersSent) {
+      return next(err);
+    }
+    console.error(`Unhandled error on ${req.method} ${req.path}:`, err);
+    text(res, 500, 'Internal error');
   });
 
   return app;
