@@ -1,4 +1,4 @@
-FROM node:24.17.0-slim AS builder
+FROM node:26.5.0-slim AS builder
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ RUN npm ci
 COPY src ./src
 RUN npm run compile
 
-FROM node:24.17.0-slim
+FROM node:26.5.0-slim
 
 WORKDIR /app
 
