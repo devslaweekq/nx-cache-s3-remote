@@ -1,5 +1,6 @@
 import { timingSafeEqual } from 'crypto';
 import type { NextFunction, Request, Response } from 'express';
+import { log } from './logger.ts';
 
 function safeEqual(a: string, b: string): boolean {
   const bufA = Buffer.from(a);
@@ -15,7 +16,10 @@ export function requireBearerToken(req: Request, res: Response, next: NextFuncti
   const expected = process.env.CACHE_ACCESS_TOKEN || '';
 
   if (scheme !== 'Bearer' || !token || !expected || !safeEqual(token, expected)) {
-    console.warn(`auth rejected: got token len=${token?.length ?? 0}, expected len=${expected.length}`);
+    log(
+      'WARN',
+      `auth rejected: ${req.method} ${req.baseUrl}, got token len=${token?.length ?? 0}, expected len=${expected.length}`,
+    );
     res.status(401).type('text/plain').send('Missing or invalid authentication token');
     return;
   }

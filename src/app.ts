@@ -1,6 +1,7 @@
 import express, { type Express } from 'express';
 import { checkBucketAccess, getObjectStream, headObject, putObjectStream } from './s3.ts';
 import { requireBearerToken } from './auth.ts';
+import { describeError, log } from './logger.ts';
 
 export interface CacheStore {
   headObject: typeof headObject;
@@ -27,7 +28,20 @@ export function createApp(store: CacheStore = defaultStore): Express {
   app.disable('x-powered-by');
 
   app.use((req, res, next) => {
-    res.on('finish', () => console.log(`${req.method} ${req.path} -> ${res.statusCode}`));
+    const startedAt = performance.now();
+    // 'close' fires after a normal finish and also when the connection drops, so it is the
+    // one place that sees every request, including those the client gave up on.
+    res.on('close', () => {
+      const line = `${req.method} ${req.path} ${res.statusCode} ${Math.round(performance.now() - startedAt)}ms`;
+      if (!res.writableFinished) {
+        log('WARN', `${line} connection closed before the response was sent`);
+      } else if (res.statusCode >= 500) {
+        log('ERROR', line);
+      } else if (!req.path.startsWith('/health') || res.statusCode >= 400) {
+        // Successful liveness/readiness probes are most of the traffic — skip them.
+        log('INFO', line);
+      }
+    });
     next();
   });
 
@@ -66,7 +80,7 @@ export function createApp(store: CacheStore = defaultStore): Express {
       if (name === 'NoSuchKey' || httpStatusCode === 404) {
         return text(res, 404, 'The record was not found');
       }
-      console.error(`GET /v1/cache/${hash} failed:`, err);
+      log('ERROR', `GET ${req.path} failed: ${describeError(err)}`);
       text(res, 500, 'Internal error');
     }
   });
@@ -92,7 +106,7 @@ export function createApp(store: CacheStore = defaultStore): Express {
       await store.putObjectStream(hash, req, contentLength);
       text(res, 200, 'OK');
     } catch (err: unknown) {
-      console.error(`PUT /v1/cache/${hash} failed:`, err);
+      log('ERROR', `PUT ${req.path} failed: ${describeError(err)}`);
       text(res, 500, 'Internal error');
     }
   });
@@ -103,7 +117,7 @@ export function createApp(store: CacheStore = defaultStore): Express {
     if (res.headersSent) {
       return next(err);
     }
-    console.error(`Unhandled error on ${req.method} ${req.path}:`, err);
+    log('ERROR', `Unhandled error on ${req.method} ${req.path}: ${describeError(err)}`);
     text(res, 500, 'Internal error');
   });
 

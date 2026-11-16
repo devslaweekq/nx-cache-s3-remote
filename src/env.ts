@@ -1,3 +1,5 @@
+import { log } from './logger.ts';
+
 const REQUIRED_ENV_VARS = [
   'CACHE_ACCESS_TOKEN',
   'NXCACHE_S3_ACCESS_KEY_ID',
@@ -11,7 +13,7 @@ const REQUIRED_ENV_VARS = [
 export function validateEnv(): void {
   const missing = REQUIRED_ENV_VARS.filter(name => !process.env[name]);
   if (missing.length > 0) {
-    console.error(`Missing required env var(s): ${missing.join(', ')}`);
+    log('ERROR', `Missing required env var(s): ${missing.join(', ')}`);
     process.exit(1);
   }
 }

@@ -140,3 +140,39 @@ test('PUT rejects uploads over the configured size limit with 413', async () => 
     delete process.env.MAX_UPLOAD_BYTES;
   }
 });
+
+test('a request the client abandons is logged as a WARN about the closed connection', async t => {
+  const logged: string[] = [];
+  t.mock.method(console, 'log', (line: string) => logged.push(line));
+
+  let uploadStarted!: () => void;
+  const started = new Promise<void>(resolve => (uploadStarted = resolve));
+  const store = fakeStore({
+    putObjectStream: () => {
+      uploadStarted();
+      return new Promise<void>(() => {}); // never settles: the client gives up first
+    },
+  });
+
+  await withServer(store, async base => {
+    const controller = new AbortController();
+    const request = fetch(`${base}/v1/cache/abc123`, {
+      method: 'PUT',
+      headers: { Authorization: 'Bearer test-token' },
+      body: 'artifact-bytes',
+      signal: controller.signal,
+    }).catch(() => {});
+
+    await started;
+    controller.abort();
+    await request;
+    await new Promise(resolve => setTimeout(resolve, 50));
+  });
+
+  assert.ok(
+    logged.some(line =>
+      /WARN PUT \/v1\/cache\/abc123 \d{3} \d+ms connection closed before the response was sent$/.test(line),
+    ),
+    `no abort warning in: ${logged.join(' | ')}`,
+  );
+});

@@ -1,10 +1,19 @@
 import { S3Client, HeadObjectCommand, GetObjectCommand, PutObjectCommand, HeadBucketCommand } from '@aws-sdk/client-s3';
 import type { Readable } from 'stream';
+import { describeError, log } from './logger.ts';
 
 const client = new S3Client({
   region: process.env.NXCACHE_S3_REGION,
   endpoint: process.env.NXCACHE_S3_ENDPOINT || undefined,
   forcePathStyle: process.env.NXCACHE_S3_FORCE_PATH_STYLE !== 'false',
+  // Without this the SDK prints its own warnings (e.g. "non-retryable streaming request")
+  // straight to the console, in a different format and without a timestamp.
+  logger: {
+    debug: () => {},
+    info: () => {},
+    warn: (...args: unknown[]) => log('WARN', `S3 SDK: ${args.map(String).join(' ')}`),
+    error: (...args: unknown[]) => log('ERROR', `S3 SDK: ${args.map(String).join(' ')}`),
+  },
   credentials: {
     accessKeyId: process.env.NXCACHE_S3_ACCESS_KEY_ID!,
     secretAccessKey: process.env.NXCACHE_S3_SECRET_ACCESS_KEY!,
@@ -17,7 +26,8 @@ export async function checkBucketAccess(): Promise<boolean> {
   try {
     await client.send(new HeadBucketCommand({ Bucket: BUCKET }));
     return true;
-  } catch {
+  } catch (err: unknown) {
+    log('ERROR', `S3 bucket ${BUCKET} is unreachable: ${describeError(err)}`);
     return false;
   }
 }
